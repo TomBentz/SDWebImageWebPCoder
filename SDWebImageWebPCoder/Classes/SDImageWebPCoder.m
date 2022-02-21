@@ -624,7 +624,7 @@ static CGSize SDCalculateThumbnailSize(CGSize fullSize, BOOL preserveAspectRatio
     return (format == SDImageFormatWebP);
 }
 
-- (NSData *)encodedDataWithImage:(UIImage *)image format:(SDImageFormat)format options:(nullable SDImageCoderOptions *)options {
+- (NSData *)encodedDataWithImage:(CGImageRef)image format:(SDImageFormat)format options:(nullable SDImageCoderOptions *)options {
     if (!image) {
         return nil;
     }
@@ -648,12 +648,12 @@ static CGSize SDCalculateThumbnailSize(CGSize fullSize, BOOL preserveAspectRatio
     if (options[SDImageCoderEncodeMaxFileSize]) {
         maxFileSize = [options[SDImageCoderEncodeMaxFileSize] unsignedIntegerValue];
     }
-    NSArray<SDImageFrame *> *frames = [SDImageCoderHelper framesFromAnimatedImage:image];
+    NSArray<SDImageFrame *> *frames = [SDImageCoderHelper framesFromAnimatedImage:[UIImage imageWithCGImage:image]];
     
     BOOL encodeFirstFrame = [options[SDImageCoderEncodeFirstFrameOnly] boolValue];
     if (encodeFirstFrame || frames.count == 0) {
         // for static single webp image
-        data = [self sd_encodedWebpDataWithImage:image.CGImage
+        data = [self sd_encodedWebpDataWithImage:image
                                          quality:compressionQuality
                                     maxPixelSize:maxPixelSize
                                      maxFileSize:maxFileSize
@@ -684,8 +684,8 @@ static CGSize SDCalculateThumbnailSize(CGSize fullSize, BOOL preserveAspectRatio
                 return nil;
             }
         }
-        
-        int loopCount = (int)image.sd_imageLoopCount;
+		UIImage *uiimage = [UIImage imageWithCGImage:image];
+        int loopCount = (int)uiimage.sd_imageLoopCount;
         WebPMuxAnimParams params = { .bgcolor = 0,
             .loop_count = loopCount
         };
